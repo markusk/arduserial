@@ -47,7 +47,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	//--------------------------------------------------------------------------------------------------
 	// the name of the serial port
 	// on Windows, this would be i.e. COM5
-	serialPortName = "/dev/tty.usbmodem1451";
+	serialPortName = "/dev/tty.usbmodemfd1411";
 	//--------------------------------------------------------------------------------------------------
 
 	// create the serial port object.

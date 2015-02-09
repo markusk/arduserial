@@ -43,11 +43,6 @@ private slots:
 	void timerSlot();
 
 	/**
-	 * @brief onReadyRead is automatically called, when data on the serial port are available from the Arduino.
-	 */
-	void onReadyRead();
-
-	/**
 	 * @brief onPortAdded is called, if a USB device is added.
 	 */
 	void onPortAdded(QextPortInfo newPortInfo);
@@ -67,7 +62,7 @@ private slots:
 
 private:
 	/**
-	 * @brief initArduino initialises my Arduino with my own instructuins
+	 * @brief initArduino initialises my Arduino with my own instructions. It also waits for an answer and reads this!
 	 */
 	void initArduino();
 

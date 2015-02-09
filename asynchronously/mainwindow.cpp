@@ -51,11 +51,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	//--------------------------------------------------------------------------------------------------
 
 	// create the serial port object.
-	// we get the serial data on the port "event driven".
-	port = new QextSerialPort(serialPortName, settings, QextSerialPort::EventDriven);
-
-	// if data are received on the serial port, call onReadyRead
-	connect(port, SIGNAL(readyRead()), SLOT(onReadyRead()));
+	// we get the serial data on the port asynchronously!
+	port = new QextSerialPort(serialPortName, settings);
 
 	// try to open Arduino serial port
 	initArduino();
@@ -84,67 +81,30 @@ void MainWindow::timerSlot()
 void MainWindow::initArduino()
 {
 	// initialise the serial port
-	// continue only on success (true)
-	if (openSerialPort() == true)
+	if (openSerialPort() == false)
 	{
-		// display message in GUI
-		ui->textEdit->insertHtml("<b>Sending data to Arduino in some seconds (arduinoInit)...</b><br><br>");
+		// ERROR !!
 
-		// Special timer, needed for Arduino!
-		//
-		// Reason:
-		// When the serial (USB) port is opened, the Arduino is not ready for serial communication immediately.
-		// Therefore we start a timer. After 3000 ms (3 seconds), it will call the function arduinoInit().
-		// This can then be used for a first command to the Arduino, like "Hey Arduino, Qt-Software now startet!".
-		QTimer::singleShot(3000, this, SLOT(timerSlot()));
-	}
-}
-
-
-bool MainWindow::openSerialPort(void)
-{
-	// open the serial port
-	port->open(QIODevice::ReadWrite | QIODevice::Unbuffered);
-
-	// error opening port
-	if (port->isOpen() == false)
-	{
-		// show error message
-		ui->textEdit->insertHtml(QString("<b>Error opening serial port <i>%1</i>.</b><br>").arg(serialPortName));
-
-		return false;
+		return;
 	}
 
-	// success
-	return true;
-}
+	// display message in GUI
+	ui->textEdit->insertHtml("<b>Sending data to Arduino in some seconds (arduinoInit)...</b><br><br>");
+
+	// Special timer, needed for Arduino!
+	//
+	// Reason:
+	// When the serial (USB) port is opened, the Arduino is not ready for serial communication immediately.
+	// Therefore we start a timer. After 3000 ms (3 seconds), it will call the function arduinoInit().
+	// This can then be used for a first command to the Arduino, like "Hey Arduino, Qt-Software now startet!".
+	QTimer::singleShot(3000, this, SLOT(timerSlot()));
 
 
-void MainWindow::sendValue(int value)
-{
-	QByteArray byte; // byte to sent to the port
-	qint64 bw = 0;   // bytes really written
+	// - - - -
+	// - - - -
+	// - - - -
 
 
-	byte.clear(); // clear buffer to be sent
-	byte.append(value); // fill buffer with value to be sent
-
-	if (port != NULL)
-	{
-		// write byte to serial port
-		bw = port->write(byte);
-
-		// show sent data
-		ui->textEdit->insertHtml(QString("%1 byte(s) written. Written value: %2 (DEC) / %3 (HEX) / %4 (ASCII)<br>").arg(bw).arg(value).arg(value, 0, 16).arg(QChar(value)));
-
-		// flush serial port
-		port->flush();
-	}
-}
-
-
-void MainWindow::onReadyRead()
-{
 	QByteArray receivedData; // the data received from the serial port
 	qint64 ba = 0; // bytes available
 	QString str; // a string to show it
@@ -187,6 +147,48 @@ void MainWindow::onReadyRead()
 			// counter +1
 			n++;
 		}
+	}
+}
+
+
+bool MainWindow::openSerialPort(void)
+{
+	// open the serial port
+	port->open(QIODevice::ReadWrite | QIODevice::Unbuffered);
+
+	// error opening port
+	if (port->isOpen() == false)
+	{
+		// show error message
+		ui->textEdit->insertHtml(QString("<b>Error opening serial port <i>%1</i>.</b><br>").arg(serialPortName));
+
+		return false;
+	}
+
+	// success
+	return true;
+}
+
+
+void MainWindow::sendValue(int value)
+{
+	QByteArray byte; // byte to sent to the port
+	qint64 bw = 0;   // bytes really written
+
+
+	byte.clear(); // clear buffer to be sent
+	byte.append(value); // fill buffer with value to be sent
+
+	if (port != NULL)
+	{
+		// write byte to serial port
+		bw = port->write(byte);
+
+		// show sent data
+		ui->textEdit->insertHtml(QString("%1 byte(s) written. Written value: %2 (DEC) / %3 (HEX) / %4 (ASCII)<br>").arg(bw).arg(value).arg(value, 0, 16).arg(QChar(value)));
+
+		// flush serial port
+		port->flush();
 	}
 }
 

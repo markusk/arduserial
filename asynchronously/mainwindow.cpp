@@ -135,13 +135,13 @@ void MainWindow::timerSlot()
 {
 	QTime startTime; // For measuring elapsed time while waiting for an answer on the serial port
 	qint64 ba = 0; // bytes available on the serial port
-	QByteArray receivedData; // the data received from the serial port
-	QString str;  // a string to show the received data
+	qint64 bytesRead = 0;
+	char buf[1024]; // stores all recieved data from the serial port
+
+	// the following varaibles are not needed an only fro displaying different formats in the GUI
 	QChar ch = 0; // the char of the received data
 	int dec = 0;  // the int of the received data
-	qint64 bytesRead = 0;
-
-	char buf[1024];
+	QString str;  // a string to show the received data
 
 
 	// show message
@@ -182,16 +182,15 @@ void MainWindow::timerSlot()
 			// read a maximum of 'ba' available bytes into the buffer as char *
 			//--------------------------------------------------------------------
 			bytesRead = port->read(buf, ba);
-/*
+
 			// ERROR
-			if ((bytesRead < ba) || (bytesRead == -1))
+			if (bytesRead == -1)
 			{
 				// show error code and message
 				ui->textEdit->insertHtml(QString("ERROR %1 at readData: %2").arg(bytesRead).arg(port->errorString()));
 
 				return;
 			}
-*/
 
 			// show message
 			ui->textEdit->insertHtml(QString("<em>%1 byte(s) received.</em><br>").arg(bytesRead));
@@ -202,11 +201,17 @@ void MainWindow::timerSlot()
 			// show each byte
 			while (n < bytesRead)
 			{
-				// show DEC of each char
+				// convert char to int
 				dec = (int) buf[n];
 
+				// convert chcar to QChar
+				ch = buf[n];
+
+				// build a QString for convenience
+				str.append(ch);
+
 				// show in GUI
-				ui->textEdit->insertHtml(QString("Byte No.%1: %2 (ASCII) / %3 (DEC) / %4 (HEX)<br>").arg(n+1).arg(buf[n]).arg(dec).arg(dec, 0, 16));
+				ui->textEdit->insertHtml(QString("Byte No.%1: %2 (ASCII) / %3 (DEC) / %4 (HEX)<br>").arg(n+1).arg(ch).arg(dec).arg(dec, 0, 16));
 
 				// counter +1
 				n++;
@@ -215,9 +220,18 @@ void MainWindow::timerSlot()
 			// add a new line
 			ui->textEdit->insertHtml("<br>");
 
+			// scroll text edit in GUI to cursor
+			ui->textEdit->ensureCursorVisible();
+
 		} // bytes available
 
 	} while (startTime.elapsed() < serialReadTimout);
+
+	// show whole string in GUI
+	ui->textEdit->insertHtml(QString("Complete String: %1").arg(str));
+
+	// scroll text edit in GUI to cursor
+	ui->textEdit->ensureCursorVisible();
 }
 
 

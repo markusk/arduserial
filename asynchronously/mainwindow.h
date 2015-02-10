@@ -2,7 +2,6 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QDebug>
 #include <QTimer>
 #include <QTime> /// For measuring elapsed time while waiting for an answer on the serial port
 #include <qextserialport.h> /// This is for serial port communication

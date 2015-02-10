@@ -66,95 +66,6 @@ MainWindow::~MainWindow()
 }
 
 
-void MainWindow::timerSlot()
-{
-	QTime startTime; // For measuring elapsed time while waiting for an answer on the serial port
-	qint64 ba = 0; // bytes available on the serial port
-	QByteArray receivedData; // the data received from the serial port
-	QString str;  // a string to show the received data
-	QChar ch = 0; // the char of the received data
-	int dec = 0;  // the int of the received data
-
-	char buf[1024];
-
-
-
-	// send values to Arduino (insert your own initialisation here!)
-	sendValue('*');
-	sendValue('r');
-	sendValue('e');
-	sendValue('#');
-
-	ui->textEdit->insertHtml("<br><b>Waiting for Arduino answer...</b><br><br>");
-
-	// just to make sure...
-	if (port->isOpen() == false)
-	{
-		ui->textEdit->insertHtml("ERROR: serial port not opened!");
-
-		return;
-	}
-
-	// check if the Arduino sends all data within an wanted time...
-	startTime.start();
-
-	do
-	{
-		// how many bytes are available?
-		ba = port->bytesAvailable();
-
-		// position in the string (index!)
-		n = 0;
-
-		// if data available (should _always_ be the case, since this method is called automatically by an event)
-		if (ba > 0)
-		{
-			// read available bytes as char *
-			n = port->read(buf, ba);
-
-			// ERROR
-			if ((n < ba) || (n == -1))
-			{
-				// get the error code
-				n = port->lastError();
-
-				// show error code and message
-				ui->textEdit->insertHtml(QString("ERROR %1 at readData: %2").arg(n).arg(port->errorString()));
-
-				return;
-			}
-
-			// convert from char * to QBytearray  -  just for convenience
-			receivedData = QByteArray::fromRawData(buf, sizeof(buf));
-
-			// convert from QByteArray to QString  -  just for convenience
-			str = QString::fromUtf8(receivedData.constData());
-
-			// show received data as QString
-			ui->textEdit->insertHtml(QString("<em>%1 byte(s) received. ASCII: %2</em><br>").arg(ba).arg(str));
-
-			// show each byte
-			while (n < receivedData.length())
-			{
-				// show DEC of each char
-				//
-				// convert one byte to QChar
-				ch = receivedData.at(n);
-
-				// convert to int
-				dec = (int) ch.toAscii();
-
-				// show in GUI
-				ui->textEdit->insertHtml(QString("Byte No.%1: %2 (DEC)<br>").arg(n+1).arg(dec));
-
-				// counter +1
-				n++;
-			}
-		}
-	} while (startTime.elapsed() < serialReadTimout);
-}
-
-
 void MainWindow::initArduino()
 {
 	// initialise the serial port
@@ -166,7 +77,7 @@ void MainWindow::initArduino()
 	}
 
 	// display message in GUI
-	ui->textEdit->insertHtml("<b>Sending data to Arduino in some seconds (arduinoInit)...</b><br><br>");
+	ui->textEdit->insertHtml("<b>Sending data to Arduino in some seconds (arduinoInit)...</b><br>");
 
 	// Special timer, needed for Arduino!
 	//
@@ -217,6 +128,100 @@ void MainWindow::sendValue(int value)
 		// flush serial port
 		port->flush();
 	}
+}
+
+
+void MainWindow::timerSlot()
+{
+	QTime startTime; // For measuring elapsed time while waiting for an answer on the serial port
+	qint64 ba = 0; // bytes available on the serial port
+	QByteArray receivedData; // the data received from the serial port
+	QString str;  // a string to show the received data
+	QChar ch = 0; // the char of the received data
+	int dec = 0;  // the int of the received data
+
+	char buf[1024];
+
+
+	// show message
+	ui->textEdit->insertHtml("<b>Sending!</b><br>");
+
+	// send values to Arduino (insert your own initialisation here!)
+	sendValue('*');
+	sendValue('r');
+	sendValue('e');
+	sendValue('#');
+
+	ui->textEdit->insertHtml("<br><b>Waiting for Arduino answer...</b><br><br>");
+
+	// just to make sure...
+	if (port->isOpen() == false)
+	{
+		ui->textEdit->insertHtml("ERROR: serial port not opened!");
+
+		return;
+	}
+
+	// check if the Arduino sends all data within an wanted time...
+	startTime.start();
+
+	do
+	{
+		// how many bytes are available?
+		ba = port->bytesAvailable();
+
+		// position in the string (index!)
+		n = 0;
+
+		// if data available (should _always_ be the case, since this method is called automatically by an event)
+		if (ba > 0)
+		{
+			// read data and convert them to a QString
+			receivedData = port->readAll();
+/*
+			// read available bytes as char *
+			n = port->read(buf, ba);
+
+			// ERROR
+			if ((n < ba) || (n == -1))
+			{
+				// get the error code
+				n = port->lastError();
+
+				// show error code and message
+				ui->textEdit->insertHtml(QString("ERROR %1 at readData: %2").arg(n).arg(port->errorString()));
+
+				return;
+			}
+
+			// convert from char * to QBytearray  -  just for convenience
+			receivedData = QByteArray::fromRawData(buf, sizeof(buf));
+*/
+			// convert from QByteArray to QString  -  just for convenience
+			str = QString::fromUtf8(receivedData.constData());
+
+			// show received data as QString
+			ui->textEdit->insertHtml(QString("<em>%1 byte(s) received. ASCII: %2</em><br>").arg(ba).arg(str));
+
+			// show each byte
+			while (n < receivedData.length())
+			{
+				// show DEC of each char
+				//
+				// convert one byte to QChar
+				ch = receivedData.at(n);
+
+				// convert to int
+				dec = (int) ch.toAscii();
+
+				// show in GUI
+				ui->textEdit->insertHtml(QString("Byte No.%1: %2 (DEC)<br>").arg(n+1).arg(dec));
+
+				// counter +1
+				n++;
+			}
+		}
+	} while (startTime.elapsed() < serialReadTimout);
 }
 
 

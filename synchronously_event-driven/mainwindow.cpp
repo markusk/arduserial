@@ -188,6 +188,9 @@ void MainWindow::onReadyRead()
 			n++;
 		}
 	}
+
+	// scroll text edit in GUI to cursor
+	ui->textEdit->ensureCursorVisible();
 }
 
 

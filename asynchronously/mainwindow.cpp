@@ -77,7 +77,7 @@ void MainWindow::initArduino()
 	}
 
 	// display message in GUI
-	ui->textEdit->insertHtml("<b>Sending data to Arduino in some seconds (arduinoInit)...</b><br>");
+	ui->textEdit->insertHtml("<b>Sending data to Arduino in some seconds (arduinoInit)...</b> ");
 
 	// Special timer, needed for Arduino!
 	//
@@ -139,12 +139,13 @@ void MainWindow::timerSlot()
 	QString str;  // a string to show the received data
 	QChar ch = 0; // the char of the received data
 	int dec = 0;  // the int of the received data
+	qint64 bytesRead = 0;
 
 	char buf[1024];
 
 
 	// show message
-	ui->textEdit->insertHtml("<b>Sending!</b><br>");
+	ui->textEdit->insertHtml("<b>Sending!</b><br><br>");
 
 	// send values to Arduino (insert your own initialisation here!)
 	sendValue('*');
@@ -170,41 +171,41 @@ void MainWindow::timerSlot()
 		// how many bytes are available?
 		ba = port->bytesAvailable();
 
-		// position in the string (index!)
-		n = 0;
+		// show message
+		ui->textEdit->insertHtml(QString("%1 byte(s) available<br>").arg(ba));
 
 		// if data available (should _always_ be the case, since this method is called automatically by an event)
 		if (ba > 0)
 		{
 			// read data and convert them to a QString
-			receivedData = port->readAll();
+//			receivedData = port->readAll();
+
+			// read a maximum of 'ba' available bytes into the buffer as char *
+			bytesRead = port->read(buf, ba);
 /*
-			// read available bytes as char *
-			n = port->read(buf, ba);
-
 			// ERROR
-			if ((n < ba) || (n == -1))
+			if ((bytesRead < ba) || (bytesRead == -1))
 			{
-				// get the error code
-				n = port->lastError();
-
 				// show error code and message
-				ui->textEdit->insertHtml(QString("ERROR %1 at readData: %2").arg(n).arg(port->errorString()));
+				ui->textEdit->insertHtml(QString("ERROR %1 at readData: %2").arg(bytesRead).arg(port->errorString()));
 
 				return;
 			}
-
-			// convert from char * to QBytearray  -  just for convenience
-			receivedData = QByteArray::fromRawData(buf, sizeof(buf));
 */
+			// convert from char * to QBytearray  -  just for convenience
+			receivedData = QByteArray::fromRawData(buf, bytesRead);
+
 			// convert from QByteArray to QString  -  just for convenience
 			str = QString::fromUtf8(receivedData.constData());
 
 			// show received data as QString
-			ui->textEdit->insertHtml(QString("<em>%1 byte(s) received. ASCII: %2</em><br>").arg(ba).arg(str));
+			ui->textEdit->insertHtml(QString("<em>%1 byte(s) received. ASCII: %2</em><br>").arg(bytesRead).arg(str));
+
+			// position in the string (index!)
+			n = 0;
 
 			// show each byte
-			while (n < receivedData.length())
+			while (n < bytesRead)
 			{
 				// show DEC of each char
 				//

@@ -27,10 +27,8 @@ public:
 	 */
 	bool openSerialPort();
 
-
-public slots:
 	/**
-	 * @brief transmitCmd sends a value to the Arduino.
+	 * @brief sendValue sends a value to the Arduino.
 	 * @param value which will be sent to the Arduino
 	 */
 	void sendValue(int value);

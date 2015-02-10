@@ -153,6 +153,7 @@ void MainWindow::timerSlot()
 	sendValue('e');
 	sendValue('#');
 
+	// show message
 	ui->textEdit->insertHtml("<br><b>Waiting for Arduino answer...</b><br><br>");
 
 	// just to make sure...
@@ -171,12 +172,12 @@ void MainWindow::timerSlot()
 		// how many bytes are available?
 		ba = port->bytesAvailable();
 
-		// show message
-		ui->textEdit->insertHtml(QString("%1 byte(s) available<br>").arg(ba));
-
 		// if data available (should _always_ be the case, since this method is called automatically by an event)
 		if (ba > 0)
 		{
+			// show message
+			ui->textEdit->insertHtml(QString("<em>%1 byte(s) available.</em>").arg(ba));
+
 			// read data and convert them to a QString
 //			receivedData = port->readAll();
 
@@ -221,6 +222,10 @@ void MainWindow::timerSlot()
 				// counter +1
 				n++;
 			}
+
+			// add a new line
+			ui->textEdit->insertHtml("<br>");
+
 		}
 	} while (startTime.elapsed() < serialReadTimout);
 }

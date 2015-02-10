@@ -123,7 +123,7 @@ void MainWindow::sendValue(int value)
 		bw = port->write(byte);
 
 		// show sent data
-		ui->textEdit->insertHtml(QString("%1 byte(s) written. Written value: %2 (DEC) / %3 (HEX) / %4 (ASCII)<br>").arg(bw).arg(value).arg(value, 0, 16).arg(QChar(value)));
+		ui->textEdit->insertHtml(QString("%1 byte(s) written. Written value: %2 (ASCII) / %3 (DEC) / %4 (HEX)<br>").arg(bw).arg(QChar(value)).arg(value).arg(value, 0, 16));
 
 		// flush serial port
 		port->flush();
@@ -178,10 +178,9 @@ void MainWindow::timerSlot()
 			// show message
 			ui->textEdit->insertHtml(QString("<em>%1 byte(s) available.</em>").arg(ba));
 
-			// read data and convert them to a QString
-//			receivedData = port->readAll();
-
+			//--------------------------------------------------------------------
 			// read a maximum of 'ba' available bytes into the buffer as char *
+			//--------------------------------------------------------------------
 			bytesRead = port->read(buf, ba);
 /*
 			// ERROR
@@ -193,31 +192,21 @@ void MainWindow::timerSlot()
 				return;
 			}
 */
-			// convert from char * to QBytearray  -  just for convenience
-			receivedData = QByteArray::fromRawData(buf, bytesRead);
 
-			// convert from QByteArray to QString  -  just for convenience
-			str = QString::fromUtf8(receivedData.constData());
+			// show message
+			ui->textEdit->insertHtml(QString("<em>%1 byte(s) received.</em><br>").arg(bytesRead));
 
-			// show received data as QString
-			ui->textEdit->insertHtml(QString("<em>%1 byte(s) received. ASCII: %2</em><br>").arg(bytesRead).arg(str));
-
-			// position in the string (index!)
+			// position in the string (index)
 			n = 0;
 
 			// show each byte
 			while (n < bytesRead)
 			{
 				// show DEC of each char
-				//
-				// convert one byte to QChar
-				ch = receivedData.at(n);
-
-				// convert to int
-				dec = (int) ch.toAscii();
+				dec = (int) buf[n];
 
 				// show in GUI
-				ui->textEdit->insertHtml(QString("Byte No.%1: %2 (DEC)<br>").arg(n+1).arg(dec));
+				ui->textEdit->insertHtml(QString("Byte No.%1: %2 (ASCII) / %3 (DEC) / %4 (HEX)<br>").arg(n+1).arg(buf[n]).arg(dec).arg(dec, 0, 16));
 
 				// counter +1
 				n++;
@@ -226,7 +215,8 @@ void MainWindow::timerSlot()
 			// add a new line
 			ui->textEdit->insertHtml("<br>");
 
-		}
+		} // bytes available
+
 	} while (startTime.elapsed() < serialReadTimout);
 }
 

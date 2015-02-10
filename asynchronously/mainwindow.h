@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QDebug>
 #include <QTimer>
+#include <QTime> /// For measuring elapsed time while waiting for an answer on the serial port
 #include <qextserialport.h> /// This is for serial port communication
 #include <qextserialenumerator.h> /// This is for getting a list of serial ports
 
@@ -71,6 +72,7 @@ private:
 	QextSerialEnumerator *enumerator; /// This is for getting a list of serial ports (filenames like /dev/ttyUSB0)
 	QString serialPortName; /// for the (file)name of the serial port, like /dev/ttyUSB0 or COM1
 	int n;
+	static const int serialReadTimout = 500; // time in ms for waiting for an answer for all bytes
 };
 
 #endif // MAINWINDOW_H

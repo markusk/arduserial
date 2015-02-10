@@ -82,52 +82,64 @@ void MainWindow::timerSlot()
 	// - - - -
 	// - - - -
 
-
-
 	QByteArray receivedData; // the data received from the serial port
 	qint64 ba = 0; // bytes available
 	QString str; // a string to show it
 	QChar ch = 0; // the char of the received data
 	int dec = 0; // the int of the received data
+	QTime startTime;
 
 
-	// how many bytes are available?
-	ba = port->bytesAvailable();
-
-	// position in the string (index!)
-	n = 0;
-
-	// if data available (should _always_ be the case, since this method is called automatically by an event)
-	if (ba > 0)
+	// just to make sure...
+	if (port->isOpen() == false)
 	{
-		// read data and convert them to a QString
-		receivedData = port->readAll();
+		ui->textEdit->insertHtml("ERROR: serial port not opened!");
 
-		// convert from QByteArray to QString
-		str = QString::fromUtf8(receivedData.constData());
-
-		// show received data as QString
-		ui->textEdit->insertHtml(QString("%1 byte(s) received. ASCII: %2<br>").arg(ba).arg(str));
-
-		// show each byte
-		while (n < receivedData.length())
-		{
-			// show DEC of each char
-			//
-			// convert one byte to QChar
-			ch = receivedData.at(n);
-
-			// convert to int
-			dec = (int) ch.toAscii();
-
-			// show in GUI
-			ui->textEdit->insertHtml(QString("Byte No.%1: %2 (DEC)<br>").arg(n).arg(dec));
-
-			// counter +1
-			n++;
-		}
+		return;
 	}
 
+	// check if the Arduino sends all data within an wanted time...
+	startTime.start();
+
+	do
+	{
+		// how many bytes are available?
+		ba = port->bytesAvailable();
+
+		// position in the string (index!)
+		n = 0;
+
+		// if data available (should _always_ be the case, since this method is called automatically by an event)
+		if (ba > 0)
+		{
+			// read data and convert them to a QString
+			receivedData = port->readAll();
+
+			// convert from QByteArray to QString
+			str = QString::fromUtf8(receivedData.constData());
+
+			// show received data as QString
+			ui->textEdit->insertHtml(QString("%1 byte(s) received. ASCII: %2<br>").arg(ba).arg(str));
+
+			// show each byte
+			while (n < receivedData.length())
+			{
+				// show DEC of each char
+				//
+				// convert one byte to QChar
+				ch = receivedData.at(n);
+
+				// convert to int
+				dec = (int) ch.toAscii();
+
+				// show in GUI
+				ui->textEdit->insertHtml(QString("Byte No.%1: %2 (DEC)<br>").arg(n).arg(dec));
+
+				// counter +1
+				n++;
+			}
+		}
+	} while (startTime.elapsed() < serialReadTimout);
 }
 
 

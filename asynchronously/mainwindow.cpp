@@ -68,6 +68,14 @@ MainWindow::~MainWindow()
 
 void MainWindow::timerSlot()
 {
+	QTime startTime; // For measuring elapsed time while waiting for an answer on the serial port
+	qint64 ba = 0; // bytes available on the serial port
+	QByteArray receivedData; // the data received from the serial port
+	QString str;  // a string to show the received data
+	QChar ch = 0; // the char of the received data
+	int dec = 0;  // the int of the received data
+
+
 	// send values to Arduino (insert your own initialisation here!)
 	sendValue('*');
 	sendValue('r');
@@ -75,20 +83,6 @@ void MainWindow::timerSlot()
 	sendValue('#');
 
 	ui->textEdit->insertHtml("<br><b>Waiting for Arduino answer...</b><br><br>");
-
-
-
-	// - - - -
-	// - - - -
-	// - - - -
-
-	QByteArray receivedData; // the data received from the serial port
-	qint64 ba = 0; // bytes available
-	QString str; // a string to show it
-	QChar ch = 0; // the char of the received data
-	int dec = 0; // the int of the received data
-	QTime startTime;
-
 
 	// just to make sure...
 	if (port->isOpen() == false)
@@ -119,7 +113,7 @@ void MainWindow::timerSlot()
 			str = QString::fromUtf8(receivedData.constData());
 
 			// show received data as QString
-			ui->textEdit->insertHtml(QString("%1 byte(s) received. ASCII: %2<br>").arg(ba).arg(str));
+			ui->textEdit->insertHtml(QString("<em>%1 byte(s) received. ASCII: %2</em><br>").arg(ba).arg(str));
 
 			// show each byte
 			while (n < receivedData.length())
@@ -133,7 +127,7 @@ void MainWindow::timerSlot()
 				dec = (int) ch.toAscii();
 
 				// show in GUI
-				ui->textEdit->insertHtml(QString("Byte No.%1: %2 (DEC)<br>").arg(n).arg(dec));
+				ui->textEdit->insertHtml(QString("Byte No.%1: %2 (DEC)<br>").arg(n+1).arg(dec));
 
 				// counter +1
 				n++;

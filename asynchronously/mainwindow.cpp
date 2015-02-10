@@ -75,34 +75,13 @@ void MainWindow::timerSlot()
 	sendValue('#');
 
 	ui->textEdit->insertHtml("<br><b>Waiting for Arduino answer...</b><br><br>");
-}
 
-
-void MainWindow::initArduino()
-{
-	// initialise the serial port
-	if (openSerialPort() == false)
-	{
-		// ERROR !!
-
-		return;
-	}
-
-	// display message in GUI
-	ui->textEdit->insertHtml("<b>Sending data to Arduino in some seconds (arduinoInit)...</b><br><br>");
-
-	// Special timer, needed for Arduino!
-	//
-	// Reason:
-	// When the serial (USB) port is opened, the Arduino is not ready for serial communication immediately.
-	// Therefore we start a timer. After 3000 ms (3 seconds), it will call the function arduinoInit().
-	// This can then be used for a first command to the Arduino, like "Hey Arduino, Qt-Software now startet!".
-	QTimer::singleShot(3000, this, SLOT(timerSlot()));
 
 
 	// - - - -
 	// - - - -
 	// - - - -
+
 
 
 	QByteArray receivedData; // the data received from the serial port
@@ -148,6 +127,30 @@ void MainWindow::initArduino()
 			n++;
 		}
 	}
+
+}
+
+
+void MainWindow::initArduino()
+{
+	// initialise the serial port
+	if (openSerialPort() == false)
+	{
+		// ERROR !!
+
+		return;
+	}
+
+	// display message in GUI
+	ui->textEdit->insertHtml("<b>Sending data to Arduino in some seconds (arduinoInit)...</b><br><br>");
+
+	// Special timer, needed for Arduino!
+	//
+	// Reason:
+	// When the serial (USB) port is opened, the Arduino is not ready for serial communication immediately.
+	// Therefore we start a timer. After 3000 ms (3 seconds), it will call the function arduinoInit().
+	// This can then be used for a first command to the Arduino, like "Hey Arduino, Qt-Software now startet!".
+	QTimer::singleShot(3000, this, SLOT(timerSlot()));
 }
 
 

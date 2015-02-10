@@ -75,6 +75,9 @@ void MainWindow::timerSlot()
 	QChar ch = 0; // the char of the received data
 	int dec = 0;  // the int of the received data
 
+	char buf[1024];
+
+
 
 	// send values to Arduino (insert your own initialisation here!)
 	sendValue('*');
@@ -106,10 +109,25 @@ void MainWindow::timerSlot()
 		// if data available (should _always_ be the case, since this method is called automatically by an event)
 		if (ba > 0)
 		{
-			// read data and convert them to a QString
-			receivedData = port->readAll();
+			// read available bytes as char *
+			n = port->read(buf, ba);
 
-			// convert from QByteArray to QString
+			// ERROR
+			if ((n < ba) || (n == -1))
+			{
+				// get the error code
+				n = port->lastError();
+
+				// show error code and message
+				ui->textEdit->insertHtml(QString("ERROR %1 at readData: %2").arg(n).arg(port->errorString()));
+
+				return;
+			}
+
+			// convert from char * to QBytearray  -  just for convenience
+			receivedData = QByteArray::fromRawData(buf, sizeof(buf));
+
+			// convert from QByteArray to QString  -  just for convenience
 			str = QString::fromUtf8(receivedData.constData());
 
 			// show received data as QString

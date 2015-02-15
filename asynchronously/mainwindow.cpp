@@ -144,13 +144,26 @@ void MainWindow::timerSlot()
 	QString str;  // a string to show the received data
 
 
+	int i = 0;
+
 	// show message
-	ui->textEdit->insertHtml("<b>Sending!</b><br><br>");
+	ui->textEdit->insertHtml(QString("<b> %1# Sending!</b><br><br>").arg(i));
 
 	// send values to Arduino (insert your own initialisation here!)
 	sendValue('*');
 	sendValue('r');
 	sendValue('e');
+	sendValue('#');
+
+for (i = 0; i<20; i++)
+{
+	// show message
+	ui->textEdit->insertHtml(QString("<b> %1# Sending!</b><br><br>").arg(i));
+
+	// send values to Arduino (insert your own initialisation here!)
+	sendValue('*');
+	sendValue('s');
+	sendValue('7');
 	sendValue('#');
 
 	// show message
@@ -232,6 +245,18 @@ void MainWindow::timerSlot()
 
 	// scroll text edit in GUI to cursor
 	ui->textEdit->ensureCursorVisible();
+
+
+	//
+	// r e s e t
+	//
+	QCoreApplication::processEvents();
+	ba = 0;
+	bytesRead = 0;
+	str.clear();
+
+	ui->textEdit->insertHtml("<br>");
+} // for
 }
 
 

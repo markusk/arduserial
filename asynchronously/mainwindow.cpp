@@ -111,7 +111,7 @@ bool MainWindow::openSerialPort(void)
 void MainWindow::sendValue(int value)
 {
 	QByteArray byte; // byte to sent to the port
-	qint64 bw = 0;   // bytes really written
+	qint64 bw = -1;   // bytes really written
 
 
 	byte.clear(); // clear buffer to be sent
@@ -127,6 +127,11 @@ void MainWindow::sendValue(int value)
 
 		// flush serial port
 		port->flush();
+
+		if (bw == -1)
+		{
+			ui->textEdit->insertHtml(QString("<font color=\"#FF0000\">ERROR '%1' when writing to serial port.</font>").arg(port->errorString()));
+		}
 	}
 }
 

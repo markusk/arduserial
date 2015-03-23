@@ -63,6 +63,8 @@ private:
 	 * @brief initArduino initialises my Arduino with my own instructions. It also waits for an answer and reads this!
 	 */
 	void initArduino();
+	QString timestamp(QString text);
+
 
 	Ui::MainWindow *ui; /// The main window (GUI)
 	QextSerialPort *port; /// The serial port

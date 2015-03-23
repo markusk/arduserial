@@ -7,7 +7,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	ui->setupUi(this);
 
 	// display message in GUI
-	ui->textEdit->insertHtml("Scanning for serial ports... ");
+	ui->textEdit->insertHtml(timestamp("Scanning for serial ports... "));
 
 	// get a list of available serial ports.
 	// this is not used in the code and only for demontration.
@@ -51,7 +51,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	//--------------------------------------------------------------------------------------------------
 
 	// create the serial port object.
-	// we get the serial data on the port asynchronously!
+	// we get the serial data on the port synchronously!
 	port = new QextSerialPort(serialPortName, settings);
 
 	// try to open Arduino serial port
@@ -77,7 +77,7 @@ void MainWindow::initArduino()
 	}
 
 	// display message in GUI
-	ui->textEdit->insertHtml("<b>Sending data to Arduino in some seconds (arduinoInit)...</b> ");
+	ui->textEdit->insertHtml(timestamp("<b>Sending data to Arduino in some seconds (arduinoInit)...</b> "));
 
 	// Special timer, needed for Arduino!
 	//
@@ -123,14 +123,14 @@ void MainWindow::sendValue(int value)
 		bw = port->write(byte);
 
 		// show sent data
-		ui->textEdit->insertHtml(QString("%1 byte(s) written. Written value: %2 (ASCII) / %3 (DEC) / %4 (HEX)<br>").arg(bw).arg(QChar(value)).arg(value).arg(value, 0, 16));
+		ui->textEdit->insertHtml(timestamp(QString("%1 byte(s) written. Written value: %2 (ASCII) / %3 (DEC) / %4 (HEX)<br>").arg(bw).arg(QChar(value)).arg(value).arg(value, 0, 16)));
 
 		// flush serial port
 		port->flush();
 
 		if (bw == -1)
 		{
-			ui->textEdit->insertHtml(QString("<font color=\"#FF0000\">ERROR '%1' when writing to serial port.</font>").arg(port->errorString()));
+			ui->textEdit->insertHtml(timestamp(QString("<font color=\"#FF0000\">ERROR '%1' when writing to serial port.</font>").arg(port->errorString())));
 		}
 	}
 }
@@ -152,7 +152,7 @@ void MainWindow::timerSlot()
 	int i = 0;
 
 	// show message
-	ui->textEdit->insertHtml(QString("<b> %1# Sending!</b><br><br>").arg(i));
+	ui->textEdit->insertHtml(timestamp(QString("<b> %1# Sending!</b><br><br>").arg(i)));
 
 	// send values to Arduino (insert your own initialisation here!)
 	sendValue('*');
@@ -160,28 +160,10 @@ void MainWindow::timerSlot()
 	sendValue('e');
 	sendValue('#');
 
-for (i = 0; i<20; i++)
-{
-	// show message
-	ui->textEdit->insertHtml(QString("<b> %1# Sending!</b><br><br>").arg(i));
 
-	// send values to Arduino (insert your own initialisation here!)
-	sendValue('*');
-	sendValue('s');
-	sendValue('7');
-	sendValue('#');
-
-	// show message
-	ui->textEdit->insertHtml("<br><b>Waiting for Arduino answer...</b><br><br>");
-
-	// just to make sure...
-	if (port->isOpen() == false)
-	{
-		ui->textEdit->insertHtml("ERROR: serial port not opened!");
-
-		return;
-	}
-
+	//-----------------------------
+	//-----------------------------
+	//-----------------------------
 	// check if the Arduino sends all data within an wanted time...
 	startTime.start();
 
@@ -190,11 +172,11 @@ for (i = 0; i<20; i++)
 		// how many bytes are available?
 		ba = port->bytesAvailable();
 
-		// if data available (should _always_ be the case, since this method is called automatically by an event)
+		// if data available
 		if (ba > 0)
 		{
 			// show message
-			ui->textEdit->insertHtml(QString("<em>%1 byte(s) available.</em>").arg(ba));
+			// ui->textEdit->insertHtml(QString("<em>%1 byte(s) available.</em>").arg(ba));
 
 			//--------------------------------------------------------------------
 			// read a maximum of 'ba' available bytes into the buffer as char *
@@ -205,13 +187,13 @@ for (i = 0; i<20; i++)
 			if (bytesRead == -1)
 			{
 				// show error code and message
-				ui->textEdit->insertHtml(QString("ERROR %1 at readData: %2").arg(bytesRead).arg(port->errorString()));
+				ui->textEdit->insertHtml(timestamp(QString("ERROR %1 at readData: %2").arg(bytesRead).arg(port->errorString())));
 
 				return;
 			}
 
 			// show message
-			ui->textEdit->insertHtml(QString("<em>%1 byte(s) received.</em><br>").arg(bytesRead));
+			ui->textEdit->insertHtml(timestamp(QString("<em>%1 byte(s) received.</em><br>").arg(bytesRead)));
 
 			// position in the string (index)
 			n = 0;
@@ -229,7 +211,7 @@ for (i = 0; i<20; i++)
 				str.append(ch);
 
 				// show in GUI
-				ui->textEdit->insertHtml(QString("Byte No.%1: %2 (ASCII) / %3 (DEC) / %4 (HEX)<br>").arg(n+1).arg(ch).arg(dec).arg(dec, 0, 16));
+				ui->textEdit->insertHtml(timestamp(QString("Byte No.%1: %2 (ASCII) / %3 (DEC) / %4 (HEX)<br>").arg(n+1).arg(ch).arg(dec).arg(dec, 0, 16)));
 
 				// counter +1
 				n++;
@@ -243,10 +225,232 @@ for (i = 0; i<20; i++)
 
 		} // bytes available
 
-	} while (startTime.elapsed() < serialReadTimout);
+	} while ((startTime.elapsed() < serialReadTimout) && (str.endsWith("#") == false));
 
 	// show whole string in GUI
-	ui->textEdit->insertHtml(QString("Complete String: %1").arg(str));
+	ui->textEdit->insertHtml(QString("Complete String: %1<br><br>").arg(str));
+
+	// scroll text edit in GUI to cursor
+	ui->textEdit->ensureCursorVisible();
+
+
+	//
+	// r e s e t
+	//
+	QCoreApplication::processEvents();
+	ba = 0;
+	bytesRead = 0;
+	str.clear();
+
+	ui->textEdit->insertHtml("<br>");
+	//-----------------------------
+	//-----------------------------
+	//-----------------------------
+
+
+
+
+
+
+for (i = 0; i<100; i++)
+{
+	//------------
+	// s7
+	//------------
+
+	// show message
+	ui->textEdit->insertHtml(timestamp(QString("<b> #%1 Sending!</b><br><br>").arg(i)));
+
+	// send values to Arduino (insert your own initialisation here!)
+	sendValue('*');
+	sendValue('s');
+	sendValue('7');
+	sendValue('#');
+
+	// show message
+	ui->textEdit->insertHtml(timestamp("<br><b>Waiting for Arduino answer...</b><br><br>"));
+
+	// just to make sure...
+	if (port->isOpen() == false)
+	{
+		ui->textEdit->insertHtml("ERROR: serial port not opened!");
+
+		return;
+	}
+
+	// check if the Arduino sends all data within an wanted time...
+	startTime.start();
+
+	do
+	{
+		// how many bytes are available?
+		ba = port->bytesAvailable();
+
+		// if data available
+		if (ba > 0)
+		{
+			// show message
+			// ui->textEdit->insertHtml(QString("<em>%1 byte(s) available.</em>").arg(ba));
+
+			//--------------------------------------------------------------------
+			// read a maximum of 'ba' available bytes into the buffer as char *
+			//--------------------------------------------------------------------
+			bytesRead = port->read(buf, ba);
+
+			// ERROR
+			if (bytesRead == -1)
+			{
+				// show error code and message
+				ui->textEdit->insertHtml(QString("ERROR %1 at readData: %2").arg(bytesRead).arg(port->errorString()));
+
+				return;
+			}
+
+			// show message
+			ui->textEdit->insertHtml(timestamp(QString("<em>%1 byte(s) received.</em><br>").arg(bytesRead)));
+
+			// position in the string (index)
+			n = 0;
+
+			// show each byte
+			while (n < bytesRead)
+			{
+				// convert char to int
+				dec = (int) buf[n];
+
+				// convert chcar to QChar
+				ch = buf[n];
+
+				// build a QString for convenience
+				str.append(ch);
+
+				// show in GUI
+				ui->textEdit->insertHtml(timestamp(QString("Byte No.%1: %2 (ASCII) / %3 (DEC) / %4 (HEX)<br>").arg(n+1).arg(ch).arg(dec).arg(dec, 0, 16)));
+
+				// counter +1
+				n++;
+			}
+
+			// add a new line
+			ui->textEdit->insertHtml("<br>");
+
+			// scroll text edit in GUI to cursor
+			ui->textEdit->ensureCursorVisible();
+
+		} // bytes available
+
+	} while ((startTime.elapsed() < serialReadTimout) && (str.endsWith("#") == false));
+
+	// show whole string in GUI
+	ui->textEdit->insertHtml(timestamp(QString("Complete String: %1<br><br>").arg(str)));
+
+	// scroll text edit in GUI to cursor
+	ui->textEdit->ensureCursorVisible();
+
+
+	//
+	// r e s e t
+	//
+	QCoreApplication::processEvents();
+	ba = 0;
+	bytesRead = 0;
+	str.clear();
+
+	ui->textEdit->insertHtml("<br>");
+
+
+
+
+
+	//------------
+	// s8
+	//------------
+
+	// show message
+	ui->textEdit->insertHtml(timestamp(QString("<b> #%1 Sending!</b><br><br>").arg(i)));
+
+	// send values to Arduino (insert your own initialisation here!)
+	sendValue('*');
+	sendValue('s');
+	sendValue('8');
+	sendValue('#');
+
+	// show message
+	ui->textEdit->insertHtml(timestamp("<br><b>Waiting for Arduino answer...</b><br><br>"));
+
+	// just to make sure...
+	if (port->isOpen() == false)
+	{
+		ui->textEdit->insertHtml("ERROR: serial port not opened!");
+
+		return;
+	}
+
+	// check if the Arduino sends all data within an wanted time...
+	startTime.start();
+
+	do
+	{
+		// how many bytes are available?
+		ba = port->bytesAvailable();
+
+		// if data available
+		if (ba > 0)
+		{
+			// show message
+			// ui->textEdit->insertHtml(QString("<em>%1 byte(s) available.</em>").arg(ba));
+
+			//--------------------------------------------------------------------
+			// read a maximum of 'ba' available bytes into the buffer as char *
+			//--------------------------------------------------------------------
+			bytesRead = port->read(buf, ba);
+
+			// ERROR
+			if (bytesRead == -1)
+			{
+				// show error code and message
+				ui->textEdit->insertHtml(QString("ERROR %1 at readData: %2").arg(bytesRead).arg(port->errorString()));
+
+				return;
+			}
+
+			// show message
+			ui->textEdit->insertHtml(timestamp(QString("<em>%1 byte(s) received.</em><br>").arg(bytesRead)));
+
+			// position in the string (index)
+			n = 0;
+
+			// show each byte
+			while (n < bytesRead)
+			{
+				// convert char to int
+				dec = (int) buf[n];
+
+				// convert chcar to QChar
+				ch = buf[n];
+
+				// build a QString for convenience
+				str.append(ch);
+
+				// show in GUI
+				ui->textEdit->insertHtml(timestamp(QString("Byte No.%1: %2 (ASCII) / %3 (DEC) / %4 (HEX)<br>").arg(n+1).arg(ch).arg(dec).arg(dec, 0, 16)));
+
+				// counter +1
+				n++;
+			}
+
+			// add a new line
+			ui->textEdit->insertHtml("<br>");
+
+			// scroll text edit in GUI to cursor
+			ui->textEdit->ensureCursorVisible();
+
+		} // bytes available
+
+	} while ((startTime.elapsed() < serialReadTimout) && (str.endsWith("#") == false));
+
+	// show whole string in GUI
+	ui->textEdit->insertHtml(timestamp(QString("Complete String: %1<br><br>").arg(str)));
 
 	// scroll text edit in GUI to cursor
 	ui->textEdit->ensureCursorVisible();
@@ -321,4 +525,17 @@ void MainWindow::showPorts(QextPortInfo portInfos, bool added)
 
 	// scroll to end
 	ui->textEdit->ensureCursorVisible();
+}
+
+
+QString MainWindow::timestamp(QString text)
+{
+	QDateTime now;
+
+
+	// get the current date and time for a timestimp in the log
+	now = QDateTime::currentDateTime();
+
+	// prepend timestamp to string
+	return QString("%1:%2:%3.%4 %5").arg(now.toString("hh")).arg(now.toString("mm")).arg(now.toString("ss")).arg(now.toString("zzz")).arg(text);
 }

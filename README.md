@@ -11,7 +11,7 @@ This is a code example for serial communication or data transfer between an Ardu
 * Download and install [Qextserialport](https://code.google.com/p/qextserialport/)
   (Do not get confused, this *is* the latest site for Qextserialport)
 * Download or checkout this repository
-* You can chose between two examples: 1) asynchronously or 2) synchronously (event driven)
+* You can chose between two examples: 1) asynchronously (event driven) or 2) synchronously
 * Open the arduserial.pro file in the corresponding subdirectory, compile it, read the code and the comments.
 * Have fun
 * Testet with Mac OS X and an Arduino Uno R3

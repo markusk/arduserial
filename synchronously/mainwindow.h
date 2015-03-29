@@ -1,5 +1,5 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef ARDUSERIAL_H
+#define ARDUSERIAL_H
 
 #include <QMainWindow>
 #include <QTimer>
@@ -9,16 +9,16 @@
 
 namespace Ui
 {
-	class MainWindow;
+	class ArduSerial;
 }
 
-class MainWindow : public QMainWindow
+class ArduSerial : public QMainWindow
 {
 	Q_OBJECT
 
 public:
-	explicit MainWindow(QWidget *parent = 0);
-	~MainWindow();
+	explicit ArduSerial(QWidget *parent = 0);
+	~ArduSerial();
 
 	/**
 	 * @brief initSerialPort Initialisation of the serial port
@@ -74,4 +74,4 @@ private:
 	static const int serialReadTimout = 500; // time in ms for waiting for an answer for all bytes
 };
 
-#endif // MAINWINDOW_H
+#endif // ARDUSERIAL_H

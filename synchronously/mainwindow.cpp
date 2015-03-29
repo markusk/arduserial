@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
+ArduSerial::ArduSerial(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
 	// show MainWindow (GUI)
 	ui->setupUi(this);
@@ -61,14 +61,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 }
 
 
-MainWindow::~MainWindow()
+ArduSerial::~ArduSerial()
 {
 	delete ui;
 	delete port;
 }
 
 
-void MainWindow::initArduino()
+void ArduSerial::initArduino()
 {
 	// initialise the serial port
 	if (openSerialPort() == false)
@@ -91,7 +91,7 @@ void MainWindow::initArduino()
 }
 
 
-bool MainWindow::openSerialPort(void)
+bool ArduSerial::openSerialPort(void)
 {
 	// open the serial port
 	port->open(QIODevice::ReadWrite | QIODevice::Unbuffered);
@@ -110,7 +110,7 @@ bool MainWindow::openSerialPort(void)
 }
 
 
-void MainWindow::sendValue(int value)
+void ArduSerial::sendValue(int value)
 {
 	QByteArray byte; // byte to sent to the port
 	qint64 bw = -1;   // bytes really written
@@ -138,7 +138,7 @@ void MainWindow::sendValue(int value)
 }
 
 
-void MainWindow::timerSlot()
+void ArduSerial::timerSlot()
 {
 	QTime startTime; // For measuring elapsed time while waiting for an answer on the serial port
 	qint64 ba = 0; // bytes available on the serial port
@@ -471,7 +471,7 @@ for (i = 0; i<100; i++)
 }
 
 
-void MainWindow::onPortAdded(QextPortInfo newPortInfo)
+void ArduSerial::onPortAdded(QextPortInfo newPortInfo)
 {
 	// get part of string
 	// (i.e. looking only for the "usbmodem1451" within "/dev/tty.usbmodem1451")
@@ -499,7 +499,7 @@ void MainWindow::onPortAdded(QextPortInfo newPortInfo)
 }
 
 
-void MainWindow::onPortRemoved(QextPortInfo newPortInfo)
+void ArduSerial::onPortRemoved(QextPortInfo newPortInfo)
 {
 	// scroll to end
 	ui->textEdit->ensureCursorVisible();
@@ -510,7 +510,7 @@ void MainWindow::onPortRemoved(QextPortInfo newPortInfo)
 }
 
 
-void MainWindow::showPorts(QextPortInfo portInfos, bool added)
+void ArduSerial::showPorts(QextPortInfo portInfos, bool added)
 {
 	ui->textEdit->insertHtml(QString("<b>Port name:</b> %1<br>").arg(portInfos.portName));
 
@@ -530,7 +530,7 @@ void MainWindow::showPorts(QextPortInfo portInfos, bool added)
 }
 
 
-QString MainWindow::timestamp(QString text)
+QString ArduSerial::timestamp(QString text)
 {
 	QDateTime now;
 

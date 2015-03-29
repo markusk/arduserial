@@ -1,5 +1,5 @@
-#include "mainwindow.h"
-#include "ui_mainwindow.h"
+#include "arduserial.h"
+#include "ui_arduserial.h"
 
 ArduSerial::ArduSerial(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {

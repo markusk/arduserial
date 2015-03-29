@@ -15,11 +15,13 @@ TARGET = arduserial
 TEMPLATE = app
 
 
-SOURCES += main.cpp\
-		mainwindow.cpp
+SOURCES += main.cpp \
+    arduserial.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += \
+    arduserial.h
 
-FORMS    += mainwindow.ui
+FORMS    += \
+    arduserial.ui
 
 INCLUDEPATH += /opt/local/include/QtExtSerialPort/
